@@ -1,0 +1,12 @@
+# Personal workout history and local development files
+workout_progress.json
+*.db
+*.sqlite*
+.env
+.env.*
+__pycache__/
+*.py[cod]
+node_modules/
+dist/
+build/
+qr_connect.png

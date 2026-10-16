@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Poco F5 Workout Tracker & Calisthenics Progression App">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Poco Workout">
+  
+  <title>Poco Workout Tracker | متتبع التمارين</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">POCO WORKOUT</div>
+        <div class="brand-subtitle">تشكيل المستقبل للقوة البدنية</div>
+        <div id="sync-status-badge" style="font-size: 9px; color: var(--success); font-weight: 700;">💾 حفظ تلقائي في Downloads</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-sound-toggle" title="كتم / تفعيل الصوت">🔔</button>
+      <button class="icon-btn" id="btn-today-shortcut" title="الانتقال لليوم">📍</button>
+    </div>
+  </header>
+
+  <!-- Sticky Rest Timer Bar -->
+  <div class="rest-timer-bar hidden" id="rest-timer-bar">
+    <div class="rest-timer-info">
+      <div class="rest-timer-pulse"></div>
+      <div>
+        <div class="rest-timer-title" id="rest-exercise-name">وقت الراحة بين الجولات</div>
+        <div class="rest-timer-countdown" id="rest-timer-display">02:00</div>
+      </div>
+    </div>
+    <div class="rest-timer-controls">
+      <button class="timer-pill-btn" id="timer-minus-15">-15s</button>
+      <button class="timer-pill-btn" id="timer-plus-30">+30s</button>
+      <button class="timer-skip-btn" id="timer-skip-btn">تخطي</button>
+    </div>
+  </div>
+
+  <!-- Main Views Container -->
+  <main id="main-content">
+    
+    <!-- TAB 1: TODAY (اليوم) -->
+    <section class="tab-pane active" id="tab-today">
+      <!-- 7-Day Rhythm Banner -->
+      <div class="rhythm-banner">
+        <div class="rhythm-title">
+          <span>🔄 إيقاع الأسبوع (Rhythm)</span>
+          <span style="font-size: 10px; color: var(--text-muted); margin-right: auto;">1–2 تكرار في الاحتياط (RIR)</span>
+        </div>
+        <div class="rhythm-chain" id="rhythm-chain-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Day Selector Carousel -->
+      <div class="day-selector" id="day-selector-carousel">
+        <!-- Day chips populated by JS -->
+      </div>
+
+      <!-- Workout Hero Card -->
+      <div class="workout-hero-card" id="workout-hero-card">
+        <div class="hero-header">
+          <div>
+            <span class="hero-session-tag" id="hero-session-tag">Workout A</span>
+            <h1 class="hero-title" id="hero-title">قوة الجزء العلوي</h1>
+            <div class="hero-subtitle" id="hero-subtitle">التركيز على 10 تكرارات بأداء نظيف ومتقن</div>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat-item">
+            <div class="stat-value" id="hero-stat-exercises">5</div>
+            <div class="stat-label">تمارين</div>
+          </div>
+          <div class="hero-stat-item">
+            <div class="stat-value" id="hero-stat-sets">14</div>
+            <div class="stat-label">إجمالي الجولات</div>
+          </div>
+          <div class="hero-stat-item">
+            <div class="stat-value" id="hero-stat-target">10 Reps</div>
+            <div class="stat-label">الهدف الأساسي</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warmup Checklist Accordion -->
+      <div class="section-accordion" id="warmup-accordion">
+        <div class="accordion-header" id="warmup-accordion-toggle">
+          <div class="accordion-title">
+            <span>🔥 الإحماء (Warm-up)</span>
+            <span class="accordion-badge">5–8 دقائق</span>
+          </div>
+          <span id="warmup-accordion-icon">▼</span>
+        </div>
+        <div class="accordion-content" id="warmup-list-container">
+          <!-- Warmup items populated by JS -->
+        </div>
+      </div>
+
+      <!-- Main Exercises Section -->
+      <div class="section-title-group" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 16px; font-weight: 800; color: #FFFFFF;">🏋️ التمارين الأساسية</h2>
+        <span style="font-size: 11px; color: var(--text-muted);">الأداء النظيف > الوصول للفشل</span>
+      </div>
+
+      <div id="exercises-list-container">
+        <!-- Exercise cards populated by JS -->
+      </div>
+
+      <!-- Complete Session Action Button -->
+      <div class="complete-workout-bar">
+        <button class="btn-primary" id="btn-complete-workout">
+          <span>🏆 إنهاء وتسجيل التمرين</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 2: PLAN (البرنامج والمرونة) -->
+    <section class="tab-pane" id="tab-plan">
+      <div class="section-title-group" style="margin-bottom: 16px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #FFFFFF;">📋 خطة التدريب الأسبوعية</h2>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+          المبدأ: شاق → استشفاء → شاق → استشفاء → شاق → خفيف → راحة تامة
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button class="btn-secondary" id="btn-open-plan-editor" style="flex: 1;">
+          ✏️ تعديل الخطة والتمارين
+        </button>
+        <button class="btn-secondary" id="btn-reset-default-plan" style="color: var(--warning); border-color: rgba(255, 179, 0, 0.4);">
+          ↺ استعادة الخطة الأصلية
+        </button>
+      </div>
+
+      <div id="plan-days-overview-container" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Overview of Mon-Sun populated by JS -->
+      </div>
+    </section>
+
+    <!-- TAB 3: HISTORY (السجل) -->
+    <section class="tab-pane" id="tab-history">
+      <div class="section-title-group" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 18px; font-weight: 800; color: #FFFFFF;">🕒 سجل التمارين</h2>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">تاريخ جلسات التدريب المنجزة</div>
+        </div>
+        <button class="btn-secondary" id="btn-clear-history" style="font-size: 11px; padding: 6px 10px; width: auto;">مسح السجل</button>
+      </div>
+
+      <div id="history-list-container">
+        <!-- History cards populated by JS -->
+      </div>
+    </section>
+
+    <!-- TAB 4: PROGRESS (التقدم والإحصائيات) -->
+    <section class="tab-pane" id="tab-progress">
+      <div class="section-title-group" style="margin-bottom: 16px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #FFFFFF;">📈 تطور الأداء والـ 10 تكرارات</h2>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">متابعة الزيادة التدريجية (Progressive Overload)</div>
+      </div>
+
+      <!-- Quick KPI Stats -->
+      <div class="hero-stats" style="margin-bottom: 16px;">
+        <div class="hero-stat-item">
+          <div class="stat-value" id="kpi-streak">0 🔥</div>
+          <div class="stat-label">سلسلة الالتزام</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="stat-value" id="kpi-total-workouts">0</div>
+          <div class="stat-label">إجمالي التمارين</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="stat-value" id="kpi-total-reps">0</div>
+          <div class="stat-label">مجموع التكرارات</div>
+        </div>
+      </div>
+
+      <!-- Exercise Progression Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <div class="chart-title">📊 منحنى التكرارات للتمرين</div>
+          <select id="chart-exercise-select" class="form-input" style="width: auto; padding: 4px 8px; font-size: 12px;">
+            <option value="pullups">العقلة قبضة علوية (Pull-ups)</option>
+            <option value="pushups">تمرين الضغط (Push-ups)</option>
+            <option value="dips">المتوازي (Dips)</option>
+            <option value="chinups">العقلة قبضة سفلية (Chin-ups)</option>
+            <option value="squats">القرفصاء (Squats)</option>
+          </select>
+        </div>
+        <div id="progression-chart-svg-container" style="height: 180px; width: 100%; display: flex; align-items: center; justify-content: center;">
+          <!-- SVG chart rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Progression Rules Box -->
+      <div class="workout-hero-card" style="margin-top: 16px;">
+        <div style="font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 8px;">
+          🎯 قواعد التدرج نحو هدف 10 تكرارات:
+        </div>
+        <ol style="padding-right: 18px; font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px;">
+          <li>بناء مجموعات نظيفة تصل إلى 10 تكرارات (Clean 10-rep sets).</li>
+          <li>عند التمكن من 3 × 10 براحة، حسّن التحكم والنزول البطيء (Tempo & Control).</li>
+          <li>ثم زد صعوبة التمرين أو أضف وزناً (Weighted) بدلاً من زيادة التكرارات بلا نهاية.</li>
+          <li>احتفظ دائماً بـ 1 إلى 2 تكرار في الاحتياط (1–2 RIR) لحماية المفاصل والاستشفاء.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- TAB 5: SETTINGS (الإعدادات والنسخ الاحتياطي) -->
+    <section class="tab-pane" id="tab-settings">
+      <div class="section-title-group" style="margin-bottom: 16px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #FFFFFF;">⚙️ إعدادات التطبيق وجهاز Poco F5</h2>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">تخصيص التنبيهات والنسخ الاحتياطي وتثبيت PWA</div>
+      </div>
+
+      <!-- Settings Cards -->
+      <div class="workout-hero-card" style="margin-bottom: 16px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: #FFFFFF; margin-bottom: 12px;">📳 التنبيهات أثناء التدريب</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <div style="font-weight: 700; font-size: 13px;">أصوات العداد (Web Audio)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">رنين إلكتروني مسموع في الجيم عند انتهاء الراحة</div>
+          </div>
+          <input type="checkbox" id="setting-sound-enabled" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 700; font-size: 13px;">الاهتزاز اللمسي (Haptic Vibration)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">نبض اهتزازي لهاتف Poco F5 عند إتمام الجولة</div>
+          </div>
+          <input type="checkbox" id="setting-vibration-enabled" checked style="width: 20px; height: 20px; accent-color: var(--primary);">
+        </div>
+      </div>
+
+      <!-- Backup & Restore -->
+      <div class="workout-hero-card" style="margin-bottom: 16px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: #FFFFFF; margin-bottom: 12px;">💾 النسخ الاحتياطي ونقل البيانات</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          جميع بياناتك تُحفظ على الهاتف تلقائياً دون اتصال بالإنترنت. يمكنك تصدير نسخة احتياطية بصيغة JSON لنقلها لأي جهاز.
+        </p>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-secondary" id="btn-export-json" style="flex: 1;">📥 تصدير البيانات (JSON)</button>
+          <button class="btn-secondary" id="btn-import-json-trigger" style="flex: 1;">📤 استيراد نسخة</button>
+          <input type="file" id="file-import-input" accept=".json" style="display: none;">
+        </div>
+      </div>
+
+      <!-- Installation Guide for Poco F5 -->
+      <div class="workout-hero-card">
+        <h3 style="font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 8px;">📱 التثبيت على شاشة Poco F5 الرئيسية</h3>
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+          يعمل التطبيق كـ <strong>Progressive Web App (PWA)</strong>:
+          <br>1. افتح الرابط في متصفح Chrome أو Brave على Poco F5.
+          <br>2. اضغط على قائمة النقاط الثلاث (⋮) ثم اختر <strong>"إضافة إلى الشاشة الرئيسية" (Add to Home screen)</strong> أو <strong>"تثبيت التطبيق" (Install App)</strong>.
+          <br>3. سيعمل التطبيق كأيقونة مستقلة بشاشة كاملة وبدون شريط عنوان ويعمل <strong>100% بدون إنترنت (Offline)</strong>.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="tab-today">
+      <span class="tab-icon">🏋️</span>
+      <span class="tab-label">اليوم</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-plan">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">البرنامج</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-history">
+      <span class="tab-icon">🕒</span>
+      <span class="tab-label">السجل</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-progress">
+      <span class="tab-icon">📈</span>
+      <span class="tab-label">التقدم</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-settings">
+      <span class="tab-icon">⚙️</span>
+      <span class="tab-label">الإعدادات</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: Warmup Hold Timer -->
+  <div class="modal-overlay" id="warmup-timer-modal">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      <h3 class="modal-title" id="warmup-modal-title">التعلق من العقلة (Dead Hang)</h3>
+      <div class="modal-desc" id="warmup-modal-desc">ثبات لمدة 15 إلى 30 ثانية لتسخين الكتفين والقبضة</div>
+      
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 24px 0;">
+        <div style="font-size: 56px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--primary);" id="warmup-modal-timer-num">30</div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">ثانية</div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <button class="btn-primary" id="btn-warmup-start" style="flex: 2;">▶ ابدأ العداد</button>
+        <button class="btn-secondary" id="btn-warmup-reset" style="flex: 1;">↺ إعادة</button>
+      </div>
+      <button class="btn-secondary" id="btn-warmup-close">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Plan Editor / Add Exercise -->
+  <div class="modal-overlay" id="plan-editor-modal">
+    <div class="modal-sheet">
+      <div class="modal-drag-handle"></div>
+      <h3 class="modal-title">تعديل التمارين والبرنامج</h3>
+      <div class="modal-desc">مرونة كاملة لإضافة، حذف، أو تعديل الجولات والتكرارات وأوقات الراحة</div>
+      
+      <div class="form-group">
+        <label class="form-label">اليوم المراد تعديله</label>
+        <select id="edit-day-select" class="form-input">
+          <option value="monday">الاثنين (Workout A)</option>
+          <option value="tuesday">الثلاثاء (Recovery / المشي)</option>
+          <option value="wednesday">الأربعاء (Workout B)</option>
+          <option value="thursday">الخميس (Recovery / إطالات)</option>
+          <option value="friday">الجمعة (Workout A)</option>
+          <option value="saturday">السبت (Light Full-Body / أرجل)</option>
+          <option value="sunday">الأحد (Rest / راحة تامة)</option>
+        </select>
+      </div>
+
+      <div id="editable-exercises-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+        <!-- Editable exercise rows populated by JS -->
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <button class="btn-secondary" id="btn-add-exercise-to-day" style="flex: 1;">➕ إضافة تمرين لهذا اليوم</button>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-primary" id="btn-save-plan-changes" style="flex: 2;">💾 حفظ التعديلات</button>
+        <button class="btn-secondary" id="btn-close-plan-editor" style="flex: 1;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Workout Completed Celebration -->
+  <div class="modal-overlay" id="celebration-modal">
+    <div class="modal-sheet" style="text-align: center;">
+      <div class="modal-drag-handle"></div>
+      <div style="font-size: 48px; margin-bottom: 8px;">🎉</div>
+      <h3 class="modal-title" style="font-size: 22px; color: var(--success);">عمل رائع! تمرين مكتمل</h3>
+      <div class="modal-desc" id="celebration-subtitle">تم حفظ جلستك التدريبية بنجاح</div>
+      
+      <div class="hero-stats" style="margin: 16px 0;">
+        <div class="hero-stat-item">
+          <div class="stat-value" id="celeb-sets">0</div>
+          <div class="stat-label">جولات منجزة</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="stat-value" id="celeb-reps">0</div>
+          <div class="stat-label">إجمالي التكرارات</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="stat-value" id="celeb-next">Recovery</div>
+          <div class="stat-label">الجلسة التالية</div>
+        </div>
+      </div>
+
+      <div style="background: var(--bg-card); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 16px; font-size: 12px; color: var(--text-muted);">
+        💡 تذكّر: استرح جيداً اليوم وتناول بروتين كافٍ لتغذية عضلاتك والاستعداد للجلسة القادمة!
+      </div>
+
+      <button class="btn-primary" id="btn-close-celebration">تم — العودة للرئيسية</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
