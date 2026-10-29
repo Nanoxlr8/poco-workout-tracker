@@ -692,7 +692,9 @@ html, body {
 }
 
 .stepper-val {
-  width: 24px;
+  width: 30px;
+  -moz-appearance: textfield;
+  appearance: textfield;
   border: none;
   background: transparent;
   color: var(--text-main);
@@ -700,6 +702,12 @@ html, body {
   font-weight: 800;
   text-align: center;
   padding: 0;
+}
+
+.stepper-val::-webkit-inner-spin-button,
+.stepper-val::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .stepper-val:focus {
